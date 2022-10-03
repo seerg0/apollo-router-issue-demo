@@ -1,0 +1,15 @@
+type Query {
+  allUsers: [User]
+  user(id: String!): User
+}
+
+type User @key(fields: "email") {
+  id: String!
+  email: String!
+  name: String
+  userProduct: UserProduct
+}
+
+type UserProduct @extends @key(fields: "userId") {
+  userId: String! @external
+}

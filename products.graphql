@@ -1,0 +1,5 @@
+type UserProduct @key(fields: "userId") {
+  userId: String!
+  productId: String!
+  productName: String
+}

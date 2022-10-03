@@ -1,0 +1,64 @@
+schema
+  @core(feature: "https://specs.apollo.dev/core/v0.2"),
+  @core(feature: "https://specs.apollo.dev/join/v0.1", for: EXECUTION)
+{
+  query: Query
+}
+
+directive @core(as: String, feature: String!, for: core__Purpose) repeatable on SCHEMA
+
+directive @join__field(graph: join__Graph, provides: join__FieldSet, requires: join__FieldSet) on FIELD_DEFINITION
+
+directive @join__graph(name: String!, url: String!) on ENUM_VALUE
+
+directive @join__owner(graph: join__Graph!) on INTERFACE | OBJECT
+
+directive @join__type(graph: join__Graph!, key: join__FieldSet) repeatable on INTERFACE | OBJECT
+
+type Product {
+  id: String!
+  name: String
+}
+
+type Query {
+  allUsers: [User] @join__field(graph: USERS)
+  user(id: String!): User @join__field(graph: USERS)
+}
+
+type User
+  @join__owner(graph: USERS)
+  @join__type(graph: USERS, key: "email")
+{
+  email: String! @join__field(graph: USERS)
+  id: String! @join__field(graph: USERS)
+  name: String @join__field(graph: USERS)
+  userProduct: UserProduct @join__field(graph: USERS)
+}
+
+type UserProduct
+  @join__owner(graph: PRODUCTS)
+  @join__type(graph: PRODUCTS, key: "userId")
+  @join__type(graph: USERS, key: "userId")
+{
+  productId: String! @join__field(graph: PRODUCTS)
+  userId: String! @join__field(graph: PRODUCTS)
+}
+
+enum core__Purpose {
+  """
+  `EXECUTION` features provide metadata necessary to for operation execution.
+  """
+  EXECUTION
+
+  """
+  `SECURITY` features provide metadata necessary to securely resolve fields.
+  """
+  SECURITY
+}
+
+scalar join__FieldSet
+
+enum join__Graph {
+  PRODUCTS @join__graph(name: "products" url: "http://localhost:4011")
+  USERS @join__graph(name: "users" url: "http://localhost:4010")
+}
